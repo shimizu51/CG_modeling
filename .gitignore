@@ -1,0 +1,11 @@
+# uv / Python
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# Model weights (downloaded from HuggingFace)
+checkpoints/
+
+.DS_Store
+data/
