@@ -276,10 +276,45 @@ async function loadLocalFile(file) {
 // ---------------------------------------------------------------------------
 
 let models = [];
+let scenes4d = [];
+
+// 4D シーン (scripts/video_to_splat4d.py の出力) は splats4D のビューア (/4d/) を別タブで開く
+function renderScenes4d(list) {
+  if (!scenes4d.length) return;
+  const g = document.createElement("div");
+  g.className = "group";
+  g.textContent = "4D (splats4D)";
+  list.append(g);
+  for (const s of scenes4d) {
+    const a = document.createElement("a");
+    a.className = "item";
+    a.href = s.url;
+    a.target = "_blank";
+    a.style.textDecoration = "none";
+    const thumb = document.createElement("div");
+    thumb.className = "thumb";
+    if (s.thumb) thumb.style.backgroundImage = `url("${s.thumb}")`;
+    const text = document.createElement("div");
+    text.style.minWidth = "0";
+    const name = document.createElement("div");
+    name.className = "name";
+    name.textContent = s.name;
+    const sub = document.createElement("div");
+    sub.className = "sub";
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = "splat4d";
+    sub.append(badge, `${fmtMB(s.size)} · ${s.frames ?? "?"} frames @ ${s.fps != null ? +s.fps.toFixed(2) : "?"} fps ↗`);
+    text.append(name, sub);
+    a.append(thumb, text);
+    list.append(a);
+  }
+}
 
 function renderList() {
   const list = $("list");
   list.replaceChildren();
+  renderScenes4d(list);
   if (!models.length) {
     const d = document.createElement("div");
     d.id = "empty";
@@ -326,6 +361,7 @@ async function refreshList(selectInitial = false) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     models = data.models;
+    scenes4d = data.scenes4d ?? [];
     $("root-dir").textContent = data.root;
   } catch (e) {
     showStatus(`モデル一覧の取得に失敗しました: ${e.message}`, true);
